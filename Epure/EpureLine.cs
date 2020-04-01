@@ -102,5 +102,10 @@ namespace Epure
             return newEpureLine;
         }
 
+        public void PlotQ()
+        {
+
+        }
+
     }
 }
