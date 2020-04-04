@@ -85,16 +85,25 @@ namespace Epure
                 Line line = new Line(epureLines[i].StartPoint, epureLines[i].EndPoint);
                 dxfDocument.AddEntity(line);
             }
-
-            //Печать эпюр. Нужно добавить кф отображения, доработать угол
+            //Печать эпюр. Нужно добавить кф отображения
             for (int i = 0; i < epureLines.Length; i++)
             {
                 double coefficient = 15;
-                var x = Math.Abs(epureLines[i].StartPoint.X - epureLines[i].EndPoint.X);
-                var y = Math.Abs(epureLines[i].StartPoint.Y - epureLines[i].EndPoint.Y);
-                var hypotenuse = Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
-                var cos = x / hypotenuse;
-                var sin = y / hypotenuse;
+                var dx = Math.Abs(epureLines[i].StartPoint.X - epureLines[i].EndPoint.X);
+                var dy = (epureLines[i].EndPoint.Y - epureLines[i].StartPoint.Y);
+                var hypotenuse = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+                var cos = dx / hypotenuse;
+                double sin; 
+                //Для ригелей у которых dy< 0 меняем направление по Х, для стоек оставляем изначальное (можно поменять направление ригелей для унификации)
+                switch (Math.Round(dx, 2))
+                {
+                    case 0:
+                        sin = dy / hypotenuse;
+                        break;
+                    default:
+                        sin = -dy / hypotenuse;
+                        break;
+                }
                 //var startMoment = Math.Sqrt(Math.Pow(epureLines[i].StartMoment, 2) / 2);
                 var pointStartMoment = new Vector2(epureLines[i].StartPoint.X + epureLines[i].StartMoment * sin / coefficient,
                     epureLines[i].StartPoint.Y + epureLines[i].StartMoment * cos / coefficient);
@@ -111,12 +120,8 @@ namespace Epure
                 Line line3 = new Line(epureLines[i].EndPoint, pointEndMoment);
                 Line line4 = new Line(pointStartMoment, pointMidlleMoment);
                 Line line5 = new Line(pointMidlleMoment, pointEndMoment);
-                dxfDocument.AddEntity(line1);
-                dxfDocument.AddEntity(line2);
-                dxfDocument.AddEntity(line3);
-                dxfDocument.AddEntity(line4);
-                dxfDocument.AddEntity(line5);
-
+                var lines = new List<Line>() {line1, line2, line3, line4, line5};
+                dxfDocument.AddEntity(lines);
             }
 
             dxfDocument.Save(@"e:\Програмирование\Перемножение эпюр\plot.dxf");

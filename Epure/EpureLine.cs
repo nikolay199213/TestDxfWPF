@@ -2,6 +2,7 @@
 using netDxf.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Epure
@@ -102,8 +103,51 @@ namespace Epure
             return newEpureLine;
         }
 
-        public void PlotQ()
+        public IEnumerable<Line> AddArrow(double startPointX, double startPointY, Directions direction)
         {
+            Vector2 startPoint = new Vector2(startPointX, startPointY);
+            Vector2 point1;
+            Vector2 point2;
+            switch (direction)
+            {
+                case Directions.Top:
+                    point1 = new Vector2(startPointX-1, startPointY-1);
+                    point2 = new Vector2(startPointX+1, startPointY-1);
+                    break;
+                case Directions.Right:
+                    point1 = new Vector2(startPointX - 1, startPointY + 1);
+                    point2 = new Vector2(startPointX - 1, startPointY - 1);
+                    break;
+                case Directions.Bottom:
+                    point1 = new Vector2(startPointX - 1, startPointY + 1);
+                    point2 = new Vector2(startPointX + 1, startPointY - 1);
+                    break;
+                default:
+                    point1 = new Vector2(startPointX + 1, startPointY + 1);
+                    point2 = new Vector2(startPointX + 1, startPointY - 1);
+                    break;
+            }
+            return new List<Line>() {new Line(startPoint, point1), new Line(startPoint, point2)};
+        }
+
+        public void PrintQ(int number)
+        {
+            
+            var pivot = new Line(Vector2.Zero, new Vector2(0, 8));
+            var lineEnd = new Line(new Vector2(-3,8), new Vector2(3,8));
+            var arrowEnd1 = new Line(new Vector2(2,9), new Vector2(3,8));
+            var arrowEnd2 = new Line(new Vector2(2, 7), new Vector2(3, 8));
+            var lineStart = new Line(new Vector2(-3, 0), new Vector2(3, 0));
+            var arrowStart1 = new Line(new Vector2(-2, 1), new Vector2(-3, 0));
+            var arrowStart2 = new Line(new Vector2(-2, -1), new Vector2(-3, 0));
+            var lines = new List<Line>() {pivot, lineEnd, lineStart, arrowEnd1, arrowEnd2, arrowStart1, arrowStart2};
+            foreach (var line in lines)
+            {
+                line.Lineweight = Lineweight.W30;
+            }
+
+            var textEnd = new Text("Q"+number.ToString()+"к", new Vector2(2,8), 0);
+            var textStart = new Text("Q" + number.ToString() + "н", new Vector2(-2, 0), 0);
 
         }
 
