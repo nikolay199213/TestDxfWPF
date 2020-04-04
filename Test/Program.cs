@@ -61,6 +61,8 @@ namespace Test
             EpureM epureM3X = epureM3.MultiplicationEpure(x3);
 
             EpureM epureOk = EpureM.SumEpureM(epureM1X, epureM2X, epureM3X, epureM);
+
+            epureOk.PlotEpure();
         }
     }
 }
