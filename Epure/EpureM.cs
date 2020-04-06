@@ -129,7 +129,13 @@ namespace Epure
 
         public void PrinyQ()
         {
-            epureLines[1].PrintQ(2);
+            DxfDocument printQ = new DxfDocument();
+            for (int i = 0; i < Length; i++)
+            {
+                if (epureLines[i].StartMoment == 0 && epureLines[i].EndMoment == 0) continue;
+                epureLines[i].PrintQ(i+1, 20*i, printQ);
+            }
+            printQ.Save(@"e:\Програмирование\Перемножение эпюр\printQ.dxf");
         }
 
         public void AddLoad(double load, int number)

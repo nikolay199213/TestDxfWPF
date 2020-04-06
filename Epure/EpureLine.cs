@@ -2,6 +2,7 @@
 using netDxf.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -181,9 +182,9 @@ namespace Epure
         {
             var length = endPoint.Y - startPoint.Y;
             var mainLine = new Line(startPoint, endPoint);
-            var firstLinePoint = new Vector2(endPoint.X, endPoint.Y+length/4);
-            var secondLinePoint = new Vector2(endPoint.X, endPoint.Y+length/2);
-            var thirdLinePoint = new Vector2(endPoint.X, startPoint.Y-length/4);
+            var firstLinePoint = new Vector2(endPoint.X, startPoint.Y+length/4);
+            var secondLinePoint = new Vector2(endPoint.X, startPoint.Y+length/2);
+            var thirdLinePoint = new Vector2(endPoint.X, endPoint.Y-length/4);
             Vector2 firstLinePoint2 = Vector2.Zero;
             Vector2 secondLinePoint2 = Vector2.Zero;
             Vector2 thirdLinePoint2 = Vector2.Zero;
@@ -191,34 +192,34 @@ namespace Epure
             switch (direction)
             {
                 case Directions.Right:
-                    firstLinePoint2 = new Vector2(endPoint.X-1, firstLinePoint.Y);
-                    secondLinePoint2 = new Vector2(endPoint.X-1, secondLinePoint.Y);
-                    thirdLinePoint2 = new Vector2(endPoint.X-1, thirdLinePoint.Y);
+                    firstLinePoint2 = new Vector2(endPoint.X + 2, firstLinePoint.Y);
+                    secondLinePoint2 = new Vector2(endPoint.X + 2, secondLinePoint.Y);
+                    thirdLinePoint2 = new Vector2(endPoint.X + 2, thirdLinePoint.Y);
                     break;
             }
             var firstLine = new Line(firstLinePoint, firstLinePoint2);
             var secondLine = new Line(secondLinePoint, secondLinePoint2);
             var thirdLine = new Line(thirdLinePoint, thirdLinePoint2);
 
-            var firstArrow = AddArrow(firstLinePoint, Directions.Right);
-            var secondArrow = AddArrow(secondLinePoint, Directions.Right);
-            var thirdArrow = AddArrow(thirdLinePoint, Directions.Right);
-            var lines = new List<Line>() {firstLine, secondLine, thirdLine};
+            var firstArrow = AddArrow(firstLinePoint2, Directions.Right);
+            var secondArrow = AddArrow(secondLinePoint2, Directions.Right);
+            var thirdArrow = AddArrow(thirdLinePoint2, Directions.Right);
+            var lines = new List<Line>() {mainLine, firstLine, secondLine, thirdLine};
             return lines.Union(firstArrow).Union(secondArrow).Union(thirdArrow).ToList();
 
         }
 
         //Добавить нагрузку
-        public void PrintQ(int number)
+        public void PrintQ(int number, int offset, DxfDocument printQ)
         {
             
-            var pivot = new Line(Vector2.Zero, new Vector2(0, 10));
-            var lineEnd = new Line(new Vector2(-2,10), new Vector2(4,10));
-            var lineStart = new Line(new Vector2(-4, 0), new Vector2(2, 0));
-            var arrowEnd = AddArrow(new Vector2(4, 10), Directions.Right);
-            var arrowStart = AddArrow(new Vector2(-4, 0), Directions.Left);
-            var endMoment = AddMomentLines(new Vector2(0, 10), EndMoment) ?? new List<Line>();
-            var startMoment = AddMomentLines(new Vector2(0, 0), StartMoment) ?? new List<Line>();
+            var pivot = new Line(new Vector2(0+offset, 0), new Vector2(0 + offset, 10));
+            var lineEnd = new Line(new Vector2(-2 + offset, 10), new Vector2(4 + offset, 10));
+            var lineStart = new Line(new Vector2(-4 + offset, 0), new Vector2(2 + offset, 0));
+            var arrowEnd = AddArrow(new Vector2(4 + offset, 10), Directions.Right);
+            var arrowStart = AddArrow(new Vector2(-4 + offset, 0), Directions.Left);
+            var endMoment = AddMomentLines(new Vector2(0 + offset, 10), EndMoment) ?? new List<Line>();
+            var startMoment = AddMomentLines(new Vector2(0 + offset, 0), StartMoment) ?? new List<Line>();
             var lines = new List<Line>() {pivot, lineEnd, lineStart};
             lines = lines.Union(arrowEnd).Union(arrowStart).Union(endMoment).Union(startMoment).ToList();
             foreach (var line in lines)
@@ -226,25 +227,24 @@ namespace Epure
                 line.Lineweight = Lineweight.W30;
             }
 
-            var textEnd = new Text("Q"+number.ToString()+"к", new Vector2(5,10), 1);
-            var textStart = new Text("Q" + number.ToString() + "н", new Vector2(-7, 0), 1);
-            var textEndMoment = new Text(EndMoment.ToString("#.###; #.###"), new Vector2(-8,12),1);
-            var textStartMoment = new Text(StartMoment.ToString("#.###; #.###"), new Vector2(5, 0), 1);
-            var textLength = new Text(Length.ToString()+"м", new Vector2(1,5), 1);
+            var textEnd = new Text("Q"+number.ToString()+"к", new Vector2(5 + offset, 10), 1);
+            var textStart = new Text("Q" + number.ToString() + "н", new Vector2(-7 + offset, 0), 1);
+            var textEndMoment = new Text(EndMoment.ToString("#.###; #.###"), new Vector2(-8 + offset, 12),1);
+            var textStartMoment = new Text(StartMoment.ToString("#.###; #.###"), new Vector2(3 + offset, 0), 1);
+            var textLength = new Text(Length.ToString("#.###;") +"м", new Vector2(1 + offset, 5), 1);
 
-            List<Line> load = new List<Line>();
+            List<EntityObject> load = new List<EntityObject>();
             if (Load != 0)
             {
-                load = AddLoad(StartPoint, EndPoint, Directions.Right).ToList();
+                load.AddRange(AddLoad(new Vector2(-2 + offset, 0), new Vector2(-2 + offset, 10), Directions.Right));
+                var textLoad = new Text(Load.ToString("####")+"кН/м", new Vector2(-8+offset, 5), 1);
+                load.Add(textLoad);
             }
 
             List<EntityObject> objects = new List<EntityObject>(){textEnd, textStart, textEndMoment, textStartMoment, textLength};
             objects = objects.Union(lines).Union(load).ToList();
-
-            DxfDocument printQ = new DxfDocument();
+            
             printQ.AddEntity(objects);
-            printQ.Save(@"e:\Програмирование\Перемножение эпюр\printQ.dxf");
-
         }
 
     }
