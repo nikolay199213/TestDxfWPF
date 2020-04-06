@@ -76,7 +76,7 @@ namespace Epure
             return newEpureM;
         }
 
-        public void PlotEpure()
+        public void PrintM()
         {
             DxfDocument dxfDocument = new DxfDocument();
             //Печать рамы
@@ -125,6 +125,22 @@ namespace Epure
             }
 
             dxfDocument.Save(@"e:\Програмирование\Перемножение эпюр\plot.dxf");
+        }
+
+        public void PrinyQ()
+        {
+            DxfDocument printQ = new DxfDocument();
+            for (int i = 0; i < Length; i++)
+            {
+                if (epureLines[i].StartMoment == 0 && epureLines[i].EndMoment == 0) continue;
+                epureLines[i].PrintQ(i+1, 20*i, printQ);
+            }
+            printQ.Save(@"e:\Програмирование\Перемножение эпюр\printQ.dxf");
+        }
+
+        public void AddLoad(double load, int number)
+        {
+            epureLines[number].Load = load;
         }
     }
 }
