@@ -132,7 +132,7 @@ namespace Epure
             DxfDocument printQ = new DxfDocument();
             for (int i = 0; i < Length; i++)
             {
-                if (epureLines[i].StartMoment == 0 && epureLines[i].EndMoment == 0) continue;
+                if (epureLines[i].StartMoment < 0.001 && epureLines[i].EndMoment == 0) continue;
                 epureLines[i].PrintQ(i+1, 20*i, printQ);
             }
             printQ.Save(@"e:\Програмирование\Перемножение эпюр\printQ.dxf");
