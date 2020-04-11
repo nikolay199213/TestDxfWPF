@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Epure;
 using netDxf;
+using netDxf.Entities;
 using Excel = Microsoft.Office.Interop.Excel;
 using Word = Microsoft.Office.Interop.Word;
 
@@ -17,6 +18,7 @@ namespace Test
         {
             DxfDocument dxfDocument;
             dxfDocument = DxfDocument.Load(@"C:\Users\Николай\Desktop\шаблон_Эпюр.dxf");
+            var test = dxfDocument.Blocks.Items.Where(x => x.Name == "тест1").First().AttributeDefinitions.Where(x => x.Key == "ТЕСТОВЫЙ_АТРИБУТ").First().Value.Value;
             var epureM = new EpureM(dxfDocument.Lines.Where(x => x.Layer.Name == "M").ToArray());
             var epureM1 = new EpureM(dxfDocument.Lines.Where(x => x.Layer.Name == "M1").ToArray());
             var epureM2 = new EpureM(dxfDocument.Lines.Where(x => x.Layer.Name == "M2").ToArray());
@@ -65,6 +67,7 @@ namespace Test
 
             epureOk.PrinyQ();
             //epureOk.PrintM();
+            Point point = new Point();
         }
     }
 }
